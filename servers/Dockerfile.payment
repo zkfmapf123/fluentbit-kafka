@@ -1,0 +1,20 @@
+## Build Stage
+FROM golang:1.24.3-alpine as builder
+
+WORKDIR /usr/src/app
+
+COPY go.mod go.sum ./
+RUN go mod download && go mod verify
+
+COPY . .
+
+RUN go build -o main cmd/payment/main.go
+
+FROM alpine:3.19.0
+
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/main ./
+ENV PORT=8080
+
+CMD ["./main"]

@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+  home:
+    container_name: home
+    build:
+      context: ../servers
+      dockerfile: Dockerfile.default
+    ports:
+      - "8080:8080"
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "localhost:24224"
+        tag: home
+        fluentd-async-connect: "true"
+    depends_on:
+      - fluent-bit
+    networks:
+      - app-network
+
+  # payment:
+  #   container_name: payment
+  #   build:
+  #     context: ../servers
+  #     dockerfile: Dockerfile.payment
+  #   ports:
+  #     - "8081:8080"
+  #   logging:
+  #     driver: fluentd
+  #     options:
+  #       fluentd-address: localhost:24224
+  #       tag: payment
+    
+  fluent-bit:
+    container_name: fluent-bit
+    hostname: fluent-bit
+    image: fluent/fluent-bit:latest
+    ports:
+      - "24224:24224"
+    volumes:
+      - ../configs/fluentbit/fluentbit.conf:/fluent-bit/etc/fluent-bit.conf
+    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
+    networks:
+      - app-network
+  
+networks:
+  app-network:
+    driver: bridge
