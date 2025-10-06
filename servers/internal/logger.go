@@ -30,5 +30,31 @@ func init() {
 func NewLogger() *zap.SugaredLogger {
 	sugar := logger.Sugar()
 	return sugar
+}
 
+func logFormat(funcname string, msgs map[string]any, logLevel string) {
+
+	fields := make([]zap.Field, 0)
+	for k, v := range msgs {
+		fields = append(fields, zap.Any(k, v))
+	}
+
+	switch logLevel {
+	case "info":
+		logger.Info(funcname, fields...)
+	case "warn":
+		logger.Warn(funcname, fields...)
+	case "debug":
+		logger.Debug(funcname, fields...)
+	case "error":
+		logger.Error(funcname, fields...)
+	}
+}
+
+func InfoLogger(funcname string, msgs map[string]any) {
+	logFormat(funcname, msgs, "info")
+}
+
+func WarnLogger(funcname string, msgs map[string]any) {
+	logFormat(funcname, msgs, "warn")
 }

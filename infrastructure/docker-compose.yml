@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   home:
@@ -13,7 +13,6 @@ services:
       options:
         fluentd-address: "localhost:24224"
         tag: home
-        fluentd-async-connect: "true"
     depends_on:
       - fluent-bit
     networks:
@@ -31,19 +30,30 @@ services:
   #     options:
   #       fluentd-address: localhost:24224
   #       tag: payment
-    
+
   fluent-bit:
     container_name: fluent-bit
     hostname: fluent-bit
     image: fluent/fluent-bit:latest
     ports:
       - "24224:24224"
+      - "2020:2020"
     volumes:
       - ../configs/fluentbit/fluentbit.conf:/fluent-bit/etc/fluent-bit.conf
+      - ../configs/fluentbit/parsers.conf:/fluent-bit/etc/parsers.conf
+      - ../logs:/var/log/flb-storage/
     command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
+    deploy:
+      resources:
+        limits:
+          cpus: "0.2"
+          memory: 256M
+        reservations:
+          cpus: "0.05"
+          memory: 64M
     networks:
       - app-network
-  
+
 networks:
   app-network:
     driver: bridge
