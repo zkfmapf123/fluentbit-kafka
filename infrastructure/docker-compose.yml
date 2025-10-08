@@ -7,7 +7,10 @@ services:
       context: ../servers
       dockerfile: Dockerfile.default
     ports:
-      - "8080:8080"
+      - "8082:8080"
+    environment:
+      - GIN_MODE=debug
+      - KAFKA_BROKERS=13.124.40.62:9092
     logging:
       driver: fluentd
       options:

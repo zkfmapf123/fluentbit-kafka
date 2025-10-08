@@ -2,13 +2,12 @@ package internal
 
 import (
 	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/IBM/sarama"
-)
-
-var (
-	bootstrapServers = []string{"localhost:9092", "localhost:9093", "localhost:9094"}
 )
 
 type Pubsub struct {
@@ -47,16 +46,21 @@ func MustNewPubsub(logger ILogger) *Pubsub {
 		},
 	}
 
-	config.Producer.Idempotent = true // 중복방지
+	// config.Producer.Idempotent = true // 중복방지
 
 	// producer
-	producer, err := sarama.NewSyncProducer(bootstrapServers, config)
+	if os.Getenv("KAFKA_BROKERS") == "" {
+		panic("KAFKA_BROKERS is not set")
+	}
+
+	producer, err := sarama.NewSyncProducer(strings.Split(os.Getenv("KAFKA_BROKERS"), ","), config)
 	if err != nil {
 		panic(err)
 	}
 
 	return &Pubsub{
 		producer: producer,
+		logger:   logger,
 	}
 }
 
@@ -70,6 +74,7 @@ func (p *Pubsub) Producer(topic string, value map[string]any) {
 
 	partition, offset, err := p.producer.SendMessage(msg)
 	if err != nil {
+		fmt.Println(err)
 		p.logger.ErrorLogger("home", spreadLog(value, map[string]any{
 			"error":     err.Error(),
 			"partition": partition,

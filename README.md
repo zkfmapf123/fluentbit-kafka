@@ -2,7 +2,7 @@
 
 - [fluentbit](FLUENT.md)
 
-- [ ] Fluentbit
+- [x] Fluentbit
 - [ ] Fluentbit + kafka
 - [ ] Fluentbit + kafka + debizium
 - [ ] Golang Kafka Source Connect -> S3

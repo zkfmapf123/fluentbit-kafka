@@ -15,7 +15,7 @@ func main() {
 	defer logger.Sync()
 
 	// kafak
-	kafka := internal.MustNewPubsub(logger)
+	// kafka := internal.MustNewPubsub(logger)
 
 	g.GET("/", func(ctx *gin.Context) {
 
@@ -36,7 +36,7 @@ func main() {
 		})
 	})
 
-	go looplogger(kafka)
+	// looplogger(kafka)
 	g.Run(":8080")
 }
 
@@ -45,19 +45,13 @@ func looplogger(kafka *internal.Pubsub) {
 	for {
 
 		kafka.Producer("home", map[string]any{
-			"age":  "32",
-			"name": "leedonggyu",
-			"job":  "devops",
+			"name":    "leedonggyu",
+			"value":   i,
+			"result2": i * i,
 		})
 
-		// internal.InfoLogger("calculator", map[string]any{
-		// 	"result":   i,
-		// 	"madeby":   "leedonggyu",
-		// 	"result*2": i * i,
-		// })
-
 		i++
-
-		time.Sleep(time.Second * 2)
+		// time.Sleep(time.Second / 2)
+		time.Sleep(time.Second * 5)
 	}
 }
