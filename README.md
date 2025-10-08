@@ -3,9 +3,9 @@
 - [fluentbit](FLUENT.md)
 
 - [x] Fluentbit
-- [ ] Fluentbit + kafka
-- [ ] Fluentbit + kafka + debizium
-- [ ] Golang Kafka Source Connect -> S3
-- [ ] Prometheus
-- [ ] Prometheus + Grafana
-- [ ] GHA
+- [x] Fluentbit + kafka (producer)
+- [x] Fluentbit + kafka (output)
+- [ ] Fluentbit + MYSQL + Debizium
+- [ ] Fluentbit output 
+- [ ] Fluentbit output autoscaling
+- [ ] opensearch
