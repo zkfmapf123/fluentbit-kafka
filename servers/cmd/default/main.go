@@ -15,7 +15,7 @@ func main() {
 	defer logger.Sync()
 
 	// kafak
-	// kafka := internal.MustNewPubsub(logger)
+	kafka := internal.MustNewPubsub(logger)
 
 	g.GET("/", func(ctx *gin.Context) {
 
@@ -36,7 +36,7 @@ func main() {
 		})
 	})
 
-	// looplogger(kafka)
+	looplogger(kafka)
 	g.Run(":8080")
 }
 

@@ -39,20 +39,21 @@ func NewLogger() *Logger {
 
 func (l *Logger) logFormat(funcname string, msgs map[string]any, logLevel string) {
 
-	fields := make([]zap.Field, 0)
+	// SugaredLogger의 Infow, Warnw 등은 key-value 쌍을 받습니다
+	fields := make([]interface{}, 0, len(msgs)*2)
 	for k, v := range msgs {
-		fields = append(fields, zap.Any(k, v))
+		fields = append(fields, k, v)
 	}
 
 	switch logLevel {
 	case "info":
-		l.l.Info(funcname, fields)
+		l.l.Infow(funcname, fields...)
 	case "warn":
-		l.l.Warn(funcname, fields)
+		l.l.Warnw(funcname, fields...)
 	case "debug":
-		l.l.Debug(funcname, fields)
+		l.l.Debugw(funcname, fields...)
 	case "error":
-		l.l.Error(funcname, fields)
+		l.l.Errorw(funcname, fields...)
 	}
 }
 
