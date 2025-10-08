@@ -4,3 +4,9 @@ up:
 
 down:
 	cd infrastructure && docker-compose down
+
+kafka:
+	cd infrastructure && docker-compose -f docker-compose.kafka.yml up --build -d
+
+kafka-down:
+	cd infrastructure && docker-compose -f docker-compose.kafka.yml down

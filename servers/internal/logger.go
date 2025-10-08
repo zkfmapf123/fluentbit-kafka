@@ -7,9 +7,18 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var logger *zap.Logger
+type Logger struct {
+	l *zap.SugaredLogger
+}
 
-func init() {
+type ILogger interface {
+	InfoLogger(funcname string, msgs map[string]any)
+	ErrorLogger(funcname string, msgs map[string]any)
+}
+
+// performance -> zap.logger
+// development -> zap.logger.sugar()
+func NewLogger() *Logger {
 
 	// NewProduction은 기본적으로 stderr 로 발생
 	config := zap.NewProductionEncoderConfig()
@@ -22,17 +31,13 @@ func init() {
 		zap.InfoLevel,
 	)
 
-	logger = zap.New(core, zap.AddCaller())
+	logger := zap.New(core, zap.AddCaller())
+	return &Logger{
+		l: logger.Sugar(),
+	}
 }
 
-// performance -> zap.logger
-// development -> zap.logger.sugar()
-func NewLogger() *zap.SugaredLogger {
-	sugar := logger.Sugar()
-	return sugar
-}
-
-func logFormat(funcname string, msgs map[string]any, logLevel string) {
+func (l *Logger) logFormat(funcname string, msgs map[string]any, logLevel string) {
 
 	fields := make([]zap.Field, 0)
 	for k, v := range msgs {
@@ -41,20 +46,24 @@ func logFormat(funcname string, msgs map[string]any, logLevel string) {
 
 	switch logLevel {
 	case "info":
-		logger.Info(funcname, fields...)
+		l.l.Info(funcname, fields)
 	case "warn":
-		logger.Warn(funcname, fields...)
+		l.l.Warn(funcname, fields)
 	case "debug":
-		logger.Debug(funcname, fields...)
+		l.l.Debug(funcname, fields)
 	case "error":
-		logger.Error(funcname, fields...)
+		l.l.Error(funcname, fields)
 	}
 }
 
-func InfoLogger(funcname string, msgs map[string]any) {
-	logFormat(funcname, msgs, "info")
+func (l *Logger) InfoLogger(funcname string, msgs map[string]any) {
+	l.logFormat(funcname, msgs, "info")
 }
 
-func WarnLogger(funcname string, msgs map[string]any) {
-	logFormat(funcname, msgs, "warn")
+func (l *Logger) ErrorLogger(funcname string, msgs map[string]any) {
+	l.logFormat(funcname, msgs, "warn")
+}
+
+func (l *Logger) Sync() {
+	l.l.Sync()
 }
