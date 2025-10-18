@@ -10,7 +10,7 @@ services:
       - "8082:8080"
     environment:
       - GIN_MODE=debug
-      - KAFKA_BROKERS=43.201.63.4:9092
+      - KAFKA_BROKERS=43.201.63.4:9092,43.201.63.4:9093
     logging:
       driver: fluentd
       options:
