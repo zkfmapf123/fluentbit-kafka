@@ -1,0 +1,88 @@
+version: "3.8"
+
+networks:
+  kafka_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.31.0.0/24
+          gateway: 172.31.0.1
+
+services:
+  kafka-1:
+    container_name: kafka-1
+    platform: linux/arm64
+    image: confluentinc/cp-kafka:7.5.3
+    ports:
+      - "9092:9092"
+    volumes:
+      - ./logs/kafka-1:/var/lib/kafka/data
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://172.31.0.4:29092,EXTERNAL://172.31.0.4:9092
+      KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:29093,EXTERNAL://0.0.0.0:9092
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@172.31.0.4:29093,2@172.31.0.5:29093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID:-MkU3OEVBNTcwNTJENDM2Qk}
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 2
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    networks:
+      kafka_network:
+        ipv4_address: 172.31.0.4
+
+  kafka-2:
+    container_name: kafka-2
+    platform: linux/arm64
+    image: confluentinc/cp-kafka:7.5.3
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./logs/kafka-2:/var/lib/kafka/data
+    environment:
+      KAFKA_NODE_ID: "2"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://172.31.0.5:29092,EXTERNAL://172.31.0.5:9093
+      KAFKA_LISTENERS: INTERNAL://:29092,CONTROLLER://:29093,EXTERNAL://0.0.0.0:9093
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@172.31.0.4:29093,2@172.31.0.5:29093
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID:-MkU3OEVBNTcwNTJENDM2Qk}
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    networks:
+      kafka_network:
+        ipv4_address: 172.31.0.5
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    restart: unless-stopped
+    container_name: kafka-ui
+    ports:
+      - "8081:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "DefaultCluster"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "172.31.0.4:29092,172.31.0.5:29092"
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_AUDIT_TOPICAUDITENABLED: "true"
+      KAFKA_CLUSTERS_0_AUDIT_CONSOLEAUDITENABLED: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "2"
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "2"
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
+    depends_on:
+      - kafka-1
+      - kafka-2
+    networks:
+      - kafka_network

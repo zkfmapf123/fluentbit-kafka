@@ -10,7 +10,12 @@ services:
       - "8082:8080"
     environment:
       - GIN_MODE=debug
-      - KAFKA_BROKERS=43.201.63.4:9092,43.201.63.4:9093
+      - KAFKA_BROKERS=172.31.0.4:9092,172.31.0.5:9093
+      - MYSQL_USER=test_user
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=12341234
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=test_db
     logging:
       driver: fluentd
       options:
@@ -18,8 +23,9 @@ services:
         tag: home
     depends_on:
       - fluent-bit
+      - mysql
     networks:
-      - app-network
+      - kafka_network
 
   # payment:
   #   container_name: payment
@@ -34,6 +40,34 @@ services:
   #       fluentd-address: localhost:24224
   #       tag: payment
 
+  mysql:
+    container_name: mysql
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=12341234
+      - MYSQL_PASSWORD=12341234
+      - MYSQL_DATABASE=test_db
+      - MYSQL_USER=test_user
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=12341234
+    command: 
+      - --character-set-server=utf8mb4 
+      - --collation-server=utf8mb4_unicode_ci
+      - --log-bin=mysql-bin  ## binlog init
+      - --binlog-format=ROW  ## row format
+      - --server-id=184054 ## unique id
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p12341234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kafka_network
+
   fluent-bit:
     container_name: fluent-bit
     hostname: fluent-bit
@@ -45,6 +79,8 @@ services:
       - ../configs/fluentbit/fluentbit.conf:/fluent-bit/etc/fluent-bit.conf
       - ../configs/fluentbit/parsers.conf:/fluent-bit/etc/parsers.conf
       - ../logs:/var/log/flb-storage/
+    environment:
+      - KAFKA_BROKERS=172.31.0.4:9092,172.31.0.5:9093
     command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
     deploy:
       resources:
@@ -55,8 +91,13 @@ services:
           cpus: "0.05"
           memory: 64M
     networks:
-      - app-network
+      - kafka_network
+
+
 
 networks:
-  app-network:
+  kafka_network:
     driver: bridge
+
+volumes:
+  mysql-data:

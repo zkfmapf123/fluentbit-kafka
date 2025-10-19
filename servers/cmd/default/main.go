@@ -4,7 +4,10 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/zkfmapf123/fpg/config"
 	"github.com/zkfmapf123/fpg/internal"
+	"github.com/zkfmapf123/fpg/models"
+	"github.com/zkfmapf123/fpg/repository"
 )
 
 func main() {
@@ -36,13 +39,24 @@ func main() {
 		})
 	})
 
-	looplogger(kafka)
+	db := config.NewDBConn()
+	db.CreateTable()
+
+	loopEvents(kafka, db)
 	g.Run(":8080")
 }
 
-func looplogger(kafka *internal.Pubsub) {
+func loopEvents(kafka *internal.Pubsub, db *config.DBConn) {
+
+	userRef := repository.NewUserRepository(db)
+
 	i := 1
 	for {
+
+		userRef.Create(&models.User{
+			Name: "leedonggyu",
+			Age:  i,
+		})
 
 		kafka.Producer("home", map[string]any{
 			"name":    "leedonggyu",

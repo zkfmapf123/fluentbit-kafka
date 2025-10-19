@@ -1,11 +1,13 @@
 # test
 
 - [fluentbit](FLUENT.md)
+- [kafka](KAFKA.md)
 
 - [x] Fluentbit
 - [x] Fluentbit + kafka (producer)
 - [x] Fluentbit + kafka (output)
-- [ ] Fluentbit + MYSQL + Debizium
-- [ ] Fluentbit output 
-- [ ] Fluentbit output autoscaling
-- [ ] opensearch
+- [x] Fluentbit + MYSQL + Debizium
+- [x] Fluentbit output 
+- [x] Fluentbit output autoscaling
+- [x] kafka
+- [ ] mirrormaker2

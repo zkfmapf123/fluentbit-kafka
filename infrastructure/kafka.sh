@@ -6,4 +6,4 @@ EXTERNAL_UP=$(curl ifconfig.me)
 
 export DOCKER_HOST_IP=$EXTERNAL_UP
 
-docker-compose -f docker-compose.kafka.yml -up --build -d
+docker-compose -f docker-compose.kafka.yml up --build -d
