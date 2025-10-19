@@ -1,0 +1,47 @@
+version: "3.8"
+
+networks:
+  kafka_network:
+    driver: bridge
+
+services:
+  mm2:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: mm2
+    platform: linux/arm64
+    ports:
+      - "8888:8888"
+    environment:
+      # Source Cluster (복제 원본)
+      SOURCE_BOOTSTRAP_SERVERS: "172.31.0.4:29092,172.31.0.5:29092"
+      
+      # Target Cluster (복제 대상)
+      TARGET_BOOTSTRAP_SERVERS: "43.203.246.245:29092"
+      
+      # MirrorMaker Connect 설정
+      CONNECT_BOOTSTRAP_SERVERS: "172.31.0.4:29092,172.31.0.5:29092"
+      CONNECT_REST_PORT: 8084
+      CONNECT_GROUP_ID: "mirrormaker-cluster"
+      CONNECT_CONFIG_STORAGE_TOPIC: "mm2-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "mm2-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "mm2-status"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: "2"
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "2"
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "2"
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.converters.ByteArrayConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.converters.ByteArrayConverter"
+      CONNECT_REST_ADVERTISED_HOST_NAME: "mirrormaker2"
+      CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+
+    restart: always
+    command:
+      - bash
+      - -c
+      - |
+        echo "Starting MirrorMaker 2..."
+        connect-mirror-maker /etc/kafka/mm2.properties
+    
+    volumes:
+      - ../configs/mirrormaker/mm2.properties:/etc/kafka/mm2.properties
+      - ../configs/mirrormaker/connect-log4j.properties:/usr/bin/config/connect-log4j.properties
+      - ../configs/mirrormaker/connect-log4j.properties:/usr/config/connect-log4j.properties

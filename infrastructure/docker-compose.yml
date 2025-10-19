@@ -11,7 +11,7 @@ services:
     environment:
       - GIN_MODE=debug
       - KAFKA_BROKERS=172.31.0.4:9092,172.31.0.5:9093
-      - MYSQL_USER=test_user
+      - MYSQL_USER=root
       - MYSQL_HOST=mysql
       - MYSQL_PASSWORD=12341234
       - MYSQL_PORT=3306

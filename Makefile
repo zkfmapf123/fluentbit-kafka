@@ -16,6 +16,7 @@ all-up:
 	-f docker-compose.yml \
 	-f docker-compose.local.kafka.yml \
 	-f docker-compose.connector.yml \
+	-f docker-compose.mm.yml \
 	up --build -d && \
 	sleep 10 && \
 	curl -X DELETE http://localhost:8083/connectors/mysql-source-connector && \
@@ -28,4 +29,5 @@ all-down:
 	-f docker-compose.yml \
 	-f docker-compose.local.kafka.yml \
 	-f docker-compose.connector.yml \
+	-f docker-compose.mm.yml \
 	down 

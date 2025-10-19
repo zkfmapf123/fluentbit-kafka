@@ -1,6 +1,7 @@
 # Kafka
 
 ![kafka](./public/f-4.png)
+![mm2](./public/f-5.png)
 
 ## Connectors
 
@@ -19,6 +20,7 @@
 
 ## Trouble Shooting
 
+### Source Connector (Debizium) Authorization Error
 ```sh
 2025-10-19 05:38:44,735 WARN   ||  WorkerSourceTask{id=mysql-source-connector-0} failed to poll records from SourceTask. Will retry operation.   [org.apache.kafka.connect.runtime.AbstractWorkerSourceTask]
 org.apache.kafka.connect.errors.RetriableException: An exception occurred in the change event producer. This connector will be restarted.
@@ -67,6 +69,49 @@ FLUSH PRIVILEGES;
 
 # 권한 확인
 SHOW GRANTS FOR 'debezium'@'%';
+```
+
+### MirrorMaker2 Log4j Error
+
+```sh
+ idong-gyu@idong-gyuui-Macmini  ~/dev/golang-pjt/fpg   master ±  docker logs mm2
+Starting MirrorMaker 2...
+log4j:ERROR Could not read configuration file from URL [file:/usr/bin/../config/connect-log4j.properties].
+java.io.FileNotFoundException: /usr/bin/../config/connect-log4j.properties (No such file or directory)
+        at java.base/java.io.FileInputStream.open0(Native Method)
+        at java.base/java.io.FileInputStream.open(FileInputStream.java:219)
+        at java.base/java.io.FileInputStream.<init>(FileInputStream.java:157)
+        at java.base/java.io.FileInputStream.<init>(FileInputStream.java:112)
+        at java.base/sun.net.www.protocol.file.FileURLConnection.connect(FileURLConnection.java:86)
+        at java.base/sun.net.www.protocol.file.FileURLConnection.getInputStream(FileURLConnection.java:184)
+        at org.apache.log4j.PropertyConfigurator.doConfigure(PropertyConfigurator.java:532)
+        at org.apache.log4j.helpers.OptionConverter.selectAndConfigure(OptionConverter.java:485)
+        at org.apache.log4j.LogManager.<clinit>(LogManager.java:115)
+        at org.slf4j.impl.Reload4jLoggerFactory.<init>(Reload4jLoggerFactory.java:67)
+        at org.slf4j.impl.StaticLoggerBinder.<init>(StaticLoggerBinder.java:72)
+        at org.slf4j.impl.StaticLoggerBinder.<clinit>(StaticLoggerBinder.java:45)
+        at org.slf4j.LoggerFactory.bind(LoggerFactory.java:150)
+        at org.slf4j.LoggerFactory.performInitialization(LoggerFactory.java:124)
+        at org.slf4j.LoggerFactory.getILoggerFactory(LoggerFactory.java:417)
+        at org.slf4j.LoggerFactory.getLogger(LoggerFactory.java:362)
+        at org.slf4j.LoggerFactory.getLogger(LoggerFactory.java:388)
+        at org.apache.kafka.connect.mirror.MirrorMaker.<clinit>(MirrorMaker.java:101)
+log4j:ERROR Ignoring configuration file [file:/usr/bin/../config/connect-log4j.properties].
+log4j:WARN No appenders could be found for logger (org.apache.kafka.connect.mirror.MirrorMaker).
+log4j:WARN Please initialize the log4j system properly.
+log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
+```
+
+- /usr/bin/../config/connect-log4j.properties 파일이 없다고 나옴
+- confluent cp 7.5.3 이미지에서 잘못설정한 것 같음
+
+```sh
+    docker exec -it mm2 /bin/bash
+    cd /etc/kafka
+    
+    cp connect-log4g.properties
+
+    저걸 위 path에 volume 해주면 에러안남
 ```
 
 ## Ref
