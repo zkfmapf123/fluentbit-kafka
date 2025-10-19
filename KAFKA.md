@@ -114,6 +114,36 @@ log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more in
     저걸 위 path에 volume 해주면 에러안남
 ```
 
+## Kafka 성능 테스트
+
+```sh
+    ## /bin...
+
+    ## producer test
+    ./kafka-producer-perf-test  --topic test --num-records 10000 --throughput -1 --producer-props \
+    bootstrap.servers="172.31.0.4:29092,172.31.0.5:29092" batch.size=10 acks=all linger.ms=100 buffer.memory=4294967296 request.timeout.ms=300000 --record-size 100
+    
+    ## --num-records : 테스트 진행할 레코드 개수
+    ## --throughput : 초당 전송 레코드 수
+    ## batch.size 묶어서 보낼 처리량단위, 메시지 크기보다 커야하며, 메시지크기가 평균 1K 라면 10 설정 시, 10개씩 묶어 보내는것임
+    ## linger.ms batch로 묶는 것을 기다리는 시간 (batch.size 를 크게줘도, linger.ms 에 도달하면 다 채우기전에 전송)
+    ## acks (0 , 1 , -1)
+    ## --record-size : 메시지 크기
+```
+
+```sh
+# 결과화면
+
+sh-4.4$ ./kafka-producer-perf-test  --topic test --num-records 10000 --throughput -1 --producer-props \
+>     bootstrap.servers="172.31.0.4:29092,172.31.0.5:29092" batch.size=10 acks=all linger.ms=100 buffer.memory=4294967296 request.timeout.ms=300000 --record-size 100
+[2025-10-19 07:44:27,654] WARN [Producer clientId=perf-producer-client] delivery.timeout.ms should be equal to or larger than linger.ms + request.timeout.ms. Setting it to 300100. (org.apache.kafka.clients.producer.KafkaProducer)
+[2025-10-19 07:44:28,374] WARN [Producer clientId=perf-producer-client] Error while fetching metadata with correlation id 2 : {test=UNKNOWN_TOPIC_OR_PARTITION} (org.apache.kafka.clients.NetworkClient)
+[2025-10-19 07:44:28,556] WARN [Producer clientId=perf-producer-client] Error while fetching metadata with correlation id 5 : {test=UNKNOWN_TOPIC_OR_PARTITION} (org.apache.kafka.clients.NetworkClient)
+5162 records sent, 1032.4 records/sec (0.10 MB/sec), 2324.0 ms avg latency, 3205.0 ms max latency.
+10000 records sent, 1424.907381 records/sec (0.14 MB/sec), 3199.36 ms avg latency, 4907.00 ms max latency, 3080 ms 50th, 4813 ms 95th, 4895 ms 99th, 4906 ms 99.9th.
+```
+ 
+
 ## Ref
 
 - <a href="https://www.confluent.io/hub/"> Confluent Hub </a>
