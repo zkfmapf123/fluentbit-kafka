@@ -10,4 +10,4 @@
 - [x] Fluentbit output 
 - [x] Fluentbit output autoscaling
 - [x] kafka
-- [ ] mirrormaker2
+- [x] mirrormaker2
